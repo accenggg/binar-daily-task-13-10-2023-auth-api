@@ -98,7 +98,48 @@ const login = async (req, res, next) => {
   }
 };
 
+const token = async (req, res, next) => {
+  try {
+    const bearerToken = req.headers.authorization;
+
+    if (!bearerToken) {
+      next(new ApiError("token nya gak ada", 401));
+    }
+
+    const token = bearerToken.split("Bearer ")[1];
+
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+
+    res.status(200).json({
+      status: "Success",
+      data: {
+        user,
+      },
+    });
+  } catch (err) {
+    // console.log(err.stack);
+    next(new ApiError(err.message, 500));
+  }
+};
+
+const cek = async (req, res, next) => {
+  try {
+    const auths = await Auth.findAll();
+    res.status(200).json({
+      status: "Success",
+      data: {
+        auths,
+      },
+    });
+  } catch (err) {
+    console.log(err.stack);
+    next(new ApiError(err.message, 400));
+  }
+};
+
 module.exports = {
   register,
   login,
+  token,
+  cek,
 };
